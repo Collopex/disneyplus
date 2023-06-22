@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  email          String?   @unique
+  hashedPassword String?
+  createdAt      DateTime? @default(now())
+  updatedAt      DateTime  @updatedAt
+  profiles       Profile[] @relation("ProfileToUser")
+
+  @@map("users")
+}
+
+model Profile {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  name           String?
+  image          String?
+  selected       Boolean?
+  ageRestriction Boolean?
+
+  userId String @db.ObjectId
+  user   User   @relation("ProfileToUser", fields: [userId], references: [id])
+
+  favoriteMovies Movie[]  @relation("MovieToProfile")
+  favoriteSeries Series[] @relation("SeriesToProfile")
+
+  @@map("profiles")
+}
+
+model Movie {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  titleImg      String
+  thumbnailImg  String
+  details       String
+  duration      String
+  releaseDate   Int
+  director      String?
+  genre         String[]
+  rating        Int?
+  nationality   String?
+  starring      String[]
+  extrasTrailer String?
+  movieUrl      String
+  createdAt     DateTime? @default(now())
+
+  profileId String[] @db.ObjectId
+  profile   Profile? @relation("MovieToProfile", fields: [profileId], references: [id])
+
+  @@map("movies")
+}
+
+model Series {
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  titleImg           String
+  thumbnailImg       String
+  details            String
+  releaseDate        Int
+  director           String?
+  genre              String[]
+  rating             Int?
+  nationality        String?
+  starring           String[]
+  extrasTrailer      String?
+  seriesUrl          String[]
+  seriesThumbnailImg String[]
+  seriesDetails      String[]
+  seriesDuration     Int[]
+  createdAt          DateTime? @default(now())
+
+  profileId String[] @db.ObjectId
+  profile   Profile? @relation("SeriesToProfile", fields: [profileId], references: [id])
+
+  @@map("series")
+}
